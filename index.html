@@ -1,0 +1,649 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TenderOS v2.1 — Clean Architecture & Live Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+<body class="bg-slate-950 text-slate-100 font-sans antialiased min-h-screen flex flex-col" x-data="tenderApp()">
+
+    <!-- Simple Toast Notification -->
+    <div x-show="toast.show" x-transition x-cloak
+         class="fixed bottom-6 right-6 z-50 bg-slate-900 border border-sky-500/40 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center gap-3">
+        <i class="ph-fill ph-check-circle text-sky-400 text-xl"></i>
+        <span class="text-sm font-medium" x-text="toast.msg"></span>
+    </div>
+
+    <!-- Clean Top Header & 5-Tab Bar -->
+    <header class="border-b border-slate-800/80 bg-slate-900/60 backdrop-blur-md sticky top-0 z-40">
+        <div class="max-w-6xl mx-auto px-6 py-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <!-- Brand -->
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-sky-500 flex items-center justify-center text-white shadow-lg shadow-sky-500/20">
+                    <i class="ph-bold ph-files text-xl"></i>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <span class="font-extrabold text-lg tracking-tight">TenderOS</span>
+                        <span class="text-xs font-mono px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">v2.1 Fixed</span>
+                    </div>
+                    <p class="text-xs text-slate-400">Automated Tender Analysis • Simple & Secure</p>
+                </div>
+            </div>
+
+            <!-- 5 Clean Navigation Tabs -->
+            <nav class="flex flex-wrap gap-1.5 bg-slate-950 p-1.5 rounded-2xl border border-slate-800">
+                <button @click="tab = 'overview'" :class="tab === 'overview' ? 'bg-sky-500 text-white shadow' : 'text-slate-400 hover:text-white'" class="px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-1.5">
+                    <i class="ph-bold ph-chart-bar"></i> 1. Overview (PRD)
+                </button>
+                <button @click="tab = 'maps'" :class="tab === 'maps' ? 'bg-sky-500 text-white shadow' : 'text-slate-400 hover:text-white'" class="px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-1.5">
+                    <i class="ph-bold ph-flow-arrow"></i> 2. System Maps
+                </button>
+                <button @click="tab = 'specs'" :class="tab === 'specs' ? 'bg-sky-500 text-white shadow' : 'text-slate-400 hover:text-white'" class="px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-1.5">
+                    <i class="ph-bold ph-cpu"></i> 3. Tech Specs (TRD/SRS)
+                </button>
+                <button @click="tab = 'user'" :class="tab === 'user' ? 'bg-emerald-500 text-white shadow' : 'text-slate-400 hover:text-white'" class="px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-1.5">
+                    <i class="ph-bold ph-user"></i> 4. User Demo
+                </button>
+                <button @click="tab = 'admin'" :class="tab === 'admin' ? 'bg-indigo-500 text-white shadow' : 'text-slate-400 hover:text-white'" class="px-4 py-2 rounded-xl text-xs font-semibold transition flex items-center gap-1.5">
+                    <i class="ph-bold ph-shield-check"></i> 5. Admin Demo
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Spacious Container -->
+    <main class="max-w-6xl w-full mx-auto px-6 py-10 flex-1">
+
+        <!-- ========================================================= -->
+        <!-- TAB 1: OVERVIEW (PRD & SCORES)                            -->
+        <!-- ========================================================= -->
+        <div x-show="tab === 'overview'" x-cloak class="space-y-10">
+            
+            <!-- Hero Header + Before/After Toggle -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-slate-900 border border-slate-800 rounded-3xl p-8">
+                <div class="space-y-2 max-w-xl">
+                    <span class="text-xs font-mono uppercase tracking-wider text-sky-400">Product Overview (PRD)</span>
+                    <h1 class="text-3xl font-extrabold text-white">Turn 100-Page RFPs into Instant Checklists.</h1>
+                    <p class="text-sm text-slate-400">Upload a tender PDF, match it against your company profile, and download a ready-to-submit Word report.</p>
+                </div>
+
+                <!-- Before / Now Switcher -->
+                <div class="bg-slate-950 p-2 rounded-2xl border border-slate-800 flex flex-col items-center gap-2 shrink-0">
+                    <span class="text-[11px] font-mono text-slate-400">Compare Project Score:</span>
+                    <div class="flex gap-1">
+                        <button @click="mode = 'fixed'" :class="mode === 'fixed' ? 'bg-emerald-500 text-white' : 'text-slate-400'" class="px-4 py-2 rounded-xl text-xs font-bold transition">
+                            Now (v2.1 Fixed)
+                        </button>
+                        <button @click="mode = 'old'" :class="mode === 'old' ? 'bg-rose-500 text-white' : 'text-slate-400'" class="px-4 py-2 rounded-xl text-xs font-bold transition">
+                            Before (LangChain)
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3 Big Score Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Cost -->
+                <div class="bg-slate-900 border border-slate-800 rounded-3xl p-7 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-semibold text-slate-400">1. Cost Score</span>
+                        <i class="ph-duotone ph-coins text-2xl text-amber-400"></i>
+                    </div>
+                    <div class="text-4xl font-extrabold font-mono" :class="mode === 'fixed' ? 'text-emerald-400' : 'text-amber-400'" x-text="mode === 'fixed' ? '9.0 / 10' : '6.5 / 10'"></div>
+                    <p class="text-xs text-slate-300 leading-relaxed" x-text="mode === 'fixed' ? 'Smart 4,000-token chunks and prompt caching cut AI bills by 68%.' : 'LangChain repeats hidden prompts and wastes tokens on big PDFs.'"></p>
+                </div>
+
+                <!-- Simplicity -->
+                <div class="bg-slate-900 border border-slate-800 rounded-3xl p-7 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-semibold text-slate-400">2. Simplicity Score</span>
+                        <i class="ph-duotone ph-Feather text-2xl text-sky-400"></i>
+                    </div>
+                    <div class="text-4xl font-extrabold font-mono" :class="mode === 'fixed' ? 'text-emerald-400' : 'text-rose-400'" x-text="mode === 'fixed' ? '9.2 / 10' : '4.0 / 10'"></div>
+                    <p class="text-xs text-slate-300 leading-relaxed" x-text="mode === 'fixed' ? 'Removed LangChain. Direct API calls return clean, predictable JSON.' : 'Hard to debug when background jobs fail inside nested chains.'"></p>
+                </div>
+
+                <!-- Security -->
+                <div class="bg-slate-900 border border-slate-800 rounded-3xl p-7 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-semibold text-slate-400">3. Security Score</span>
+                        <i class="ph-duotone ph-shield-check text-2xl text-indigo-400"></i>
+                    </div>
+                    <div class="text-4xl font-extrabold font-mono" :class="mode === 'fixed' ? 'text-emerald-400' : 'text-amber-400'" x-text="mode === 'fixed' ? '9.5 / 10' : '7.5 / 10'"></div>
+                    <p class="text-xs text-slate-300 leading-relaxed" x-text="mode === 'fixed' ? 'Secret tenders bypass middleman proxies; XML tags block PDF prompt hacks.' : 'Sensitive docs pass through third-party proxies without prompt guards.'"></p>
+                </div>
+            </div>
+
+            <!-- 3 Simple Solution Cards -->
+            <div>
+                <h2 class="text-lg font-bold text-white mb-4">How We Fixed the 3 Issues</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 space-y-2">
+                        <div class="text-sky-400 font-bold text-sm flex items-center gap-2">
+                            <i class="ph-fill ph-scissors"></i> 1. Smart Text Splitting
+                        </div>
+                        <ul class="text-xs text-slate-300 space-y-1.5 list-disc list-inside">
+                            <li>Splits PDFs into exact 4,000-token slices (`tiktoken`).</li>
+                            <li>Caches system prompts to save up to 70% on fees.</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 space-y-2">
+                        <div class="text-emerald-400 font-bold text-sm flex items-center gap-2">
+                            <i class="ph-fill ph-code"></i> 2. No LangChain Bloat
+                        </div>
+                        <ul class="text-xs text-slate-300 space-y-1.5 list-disc list-inside">
+                            <li>Uses direct Python API calls instead of heavy frameworks.</li>
+                            <li>Forces strict JSON formatting via Pydantic v2.</li>
+                        </ul>
+                    </div>
+
+                    <div class="bg-slate-900/60 border border-slate-800 rounded-2xl p-6 space-y-2">
+                        <div class="text-amber-400 font-bold text-sm flex items-center gap-2">
+                            <i class="ph-fill ph-lock-key"></i> 3. Smart Security Routing
+                        </div>
+                        <ul class="text-xs text-slate-300 space-y-1.5 list-disc list-inside">
+                            <li>Secret docs go direct to private OpenAI/Azure servers.</li>
+                            <li>Wraps PDF text in `&lt;tender_doc&gt;` tags to stop prompt hacks.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================= -->
+        <!-- TAB 2: SYSTEM MAPS (CONCEPT, PROCESS, OPERATION)          -->
+        <!-- ========================================================= -->
+        <div x-show="tab === 'maps'" x-cloak class="space-y-8">
+            
+            <!-- Header & Map Type Switcher -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-slate-900 border border-slate-800 rounded-3xl p-7">
+                <div>
+                    <h2 class="text-2xl font-bold text-white">Interactive System Maps</h2>
+                    <p class="text-xs text-slate-400 mt-1">Click any step below to see how the system works in plain English.</p>
+                </div>
+                <div class="flex gap-1.5 bg-slate-950 p-1.5 rounded-xl border border-slate-800 text-xs font-semibold">
+                    <button @click="mapType = 'concept'; mapStep = 0" :class="mapType === 'concept' ? 'bg-sky-500 text-white' : 'text-slate-400'" class="px-3.5 py-2 rounded-lg transition">Concept Map</button>
+                    <button @click="mapType = 'process'; mapStep = 0" :class="mapType === 'process' ? 'bg-sky-500 text-white' : 'text-slate-400'" class="px-3.5 py-2 rounded-lg transition">Process Map</button>
+                    <button @click="mapType = 'ops'; mapStep = 0" :class="mapType === 'ops' ? 'bg-sky-500 text-white' : 'text-slate-400'" class="px-3.5 py-2 rounded-lg transition">Operation Map</button>
+                </div>
+            </div>
+
+            <!-- Horizontal Step Selector -->
+            <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3">
+                <template x-for="(item, index) in currentMapList" :key="index">
+                    <button @click="mapStep = index"
+                            :class="mapStep === index ? 'bg-sky-500/20 border-sky-400 text-white ring-2 ring-sky-500/30' : 'bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700'"
+                            class="p-4 rounded-2xl border text-left transition flex flex-col justify-between h-24">
+                        <span class="text-[11px] font-mono text-sky-400 font-bold" x-text="'STEP ' + (index + 1)"></span>
+                        <span class="text-xs font-bold text-slate-100 leading-snug" x-text="item.title"></span>
+                    </button>
+                </template>
+            </div>
+
+            <!-- 3 Simple Detail Boxes for Selected Step -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-slate-900 border border-slate-800 rounded-3xl p-7 space-y-3">
+                    <div class="text-xs font-mono uppercase text-sky-400 flex items-center gap-2">
+                        <i class="ph-fill ph-user-circle text-lg"></i> 1. Actor / User Action
+                    </div>
+                    <p class="text-base font-semibold text-white leading-relaxed" x-text="currentMapList[mapStep].box1"></p>
+                </div>
+
+                <div class="bg-slate-900 border border-slate-800 rounded-3xl p-7 space-y-3">
+                    <div class="text-xs font-mono uppercase text-indigo-400 flex items-center gap-2">
+                        <i class="ph-fill ph-gear text-lg"></i> 2. What System Does
+                    </div>
+                    <p class="text-base font-semibold text-white leading-relaxed" x-text="currentMapList[mapStep].box2"></p>
+                </div>
+
+                <div class="bg-emerald-950/20 border border-emerald-500/30 rounded-3xl p-7 space-y-3">
+                    <div class="text-xs font-mono uppercase text-emerald-400 flex items-center gap-2">
+                        <i class="ph-fill ph-check-circle text-lg"></i> 3. Final Result
+                    </div>
+                    <p class="text-base font-semibold text-emerald-200 leading-relaxed" x-text="currentMapList[mapStep].box3"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================= -->
+        <!-- TAB 3: TECH SPECS (SRS STATE MACHINE & TRD STACK)         -->
+        <!-- ========================================================= -->
+        <div x-show="tab === 'specs'" x-cloak class="space-y-8">
+            
+            <!-- Interactive 8-State Lifecycle (SRS) -->
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-8 space-y-6">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                    <div>
+                        <span class="text-xs font-mono uppercase text-sky-400">SRS Lifecycle</span>
+                        <h2 class="text-xl font-bold text-white">Interactive 8-Stage State Machine</h2>
+                    </div>
+                    <span class="text-xs text-slate-400">Click any state to inspect its rule</span>
+                </div>
+
+                <!-- 8 State Pills -->
+                <div class="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-2.5">
+                    <template x-for="st in states" :key="st.name">
+                        <button @click="activeState = st"
+                                :class="activeState.name === st.name ? 'bg-sky-500 text-white border-sky-400 shadow-lg shadow-sky-500/20' : 'bg-slate-950 border-slate-800 text-slate-400 hover:text-white'"
+                                class="p-3 rounded-xl border text-center transition">
+                            <div class="text-[10px] font-mono opacity-75" x-text="'Stage ' + st.step"></div>
+                            <div class="text-xs font-mono font-bold truncate mt-1" x-text="st.name"></div>
+                        </button>
+                    </template>
+                </div>
+
+                <!-- Selected State Simple Explanation -->
+                <div class="bg-slate-950 border border-slate-800 rounded-2xl p-6 flex flex-col md:flex-row md:items-center justify-between gap-4">
+                    <div class="space-y-1">
+                        <div class="text-xs font-mono text-sky-400" x-text="'Current State: ' + activeState.name"></div>
+                        <div class="text-sm font-medium text-white" x-text="activeState.desc"></div>
+                    </div>
+                    <div class="shrink-0 bg-slate-900 px-4 py-2.5 rounded-xl border border-slate-800 text-xs font-mono">
+                        <span class="text-slate-400">Next Valid States: </span>
+                        <span class="text-emerald-400 font-bold" x-text="activeState.next"></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Two-Column TRD Summary: Tech Stack + Database/Files -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                
+                <!-- Simple Tech Stack List -->
+                <div class="bg-slate-900 border border-slate-800 rounded-3xl p-7 space-y-4">
+                    <h3 class="text-base font-bold text-white">Target Tech Stack (TRD)</h3>
+                    <div class="space-y-3 text-xs">
+                        <div class="flex justify-between p-3 rounded-xl bg-slate-950 border border-slate-800">
+                            <span class="text-slate-400">Web & API Server</span>
+                            <span class="font-mono font-semibold text-white">Python FastAPI (Render)</span>
+                        </div>
+                        <div class="flex justify-between p-3 rounded-xl bg-slate-950 border border-slate-800">
+                            <span class="text-slate-400">Frontend UI</span>
+                            <span class="font-mono font-semibold text-white">Jinja2 + Alpine.js + Tailwind</span>
+                        </div>
+                        <div class="flex justify-between p-3 rounded-xl bg-slate-950 border border-slate-800">
+                            <span class="text-slate-400">Background Jobs & Locks</span>
+                            <span class="font-mono font-semibold text-sky-400">Celery + Redis (Double-Charge Lock)</span>
+                        </div>
+                        <div class="flex justify-between p-3 rounded-xl bg-slate-950 border border-slate-800">
+                            <span class="text-slate-400">File Storage (100MB PDFs)</span>
+                            <span class="font-mono font-semibold text-emerald-400">Cloudflare R2 (Direct Upload)</span>
+                        </div>
+                        <div class="flex justify-between p-3 rounded-xl bg-slate-950 border border-slate-800">
+                            <span class="text-slate-400">Database & Payments</span>
+                            <span class="font-mono font-semibold text-white">MongoDB Atlas + Paystation</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Simple Database & Folder Peek -->
+                <div class="bg-slate-900 border border-slate-800 rounded-3xl p-7 space-y-4">
+                    <div class="flex items-center justify-between">
+                        <h3 class="text-base font-bold text-white">Database & Code Structure</h3>
+                        <div class="flex gap-1 bg-slate-950 p-1 rounded-lg border border-slate-800 text-xs">
+                            <button @click="specPeek = 'db'" :class="specPeek === 'db' ? 'bg-slate-800 text-white' : 'text-slate-400'" class="px-2.5 py-1 rounded">7 Collections</button>
+                            <button @click="specPeek = 'files'" :class="specPeek === 'files' ? 'bg-slate-800 text-white' : 'text-slate-400'" class="px-2.5 py-1 rounded">Folder Tree</button>
+                        </div>
+                    </div>
+
+                    <!-- 7 Collections List -->
+                    <div x-show="specPeek === 'db'" class="space-y-2 text-xs">
+                        <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex justify-between"><span class="font-mono text-sky-400">1. users</span><span class="text-slate-400">Login, clearance & ISO certs</span></div>
+                        <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex justify-between"><span class="font-mono text-sky-400">2. projects</span><span class="text-slate-400">RFP title, deadline & status</span></div>
+                        <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex justify-between"><span class="font-mono text-sky-400">3. file_assets</span><span class="text-slate-400">R2 PDF link & SHA256 checksum</span></div>
+                        <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex justify-between"><span class="font-mono text-sky-400">4. payments</span><span class="text-slate-400">Paystation $250 receipt</span></div>
+                        <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex justify-between"><span class="font-mono text-sky-400">5. evaluations</span><span class="text-slate-400">Readiness score & Word link</span></div>
+                        <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex justify-between"><span class="font-mono text-sky-400">6. compliance_items</span><span class="text-slate-400">Individual RFP checklist rows</span></div>
+                        <div class="p-2.5 rounded-xl bg-slate-950 border border-slate-800 flex justify-between"><span class="font-mono text-sky-400">7. audit_logs</span><span class="text-slate-400">Security & admin activity trail</span></div>
+                    </div>
+
+                    <!-- Clean Folder Tree -->
+                    <pre x-show="specPeek === 'files'" class="bg-slate-950 border border-slate-800 rounded-xl p-4 text-xs font-mono text-slate-300 leading-relaxed">tenderos-monorepo/
+├── render.yaml          # Cloud setup
+├── requirements.txt     # Python packages (tiktoken, httpx)
+└── app/
+    ├── main.py          # FastAPI server
+    ├── config.py        # Secret vs Standard router
+    ├── core/            # R2 storage & scoring logic
+    ├── api/             # Upload, payment & admin routes
+    ├── worker/          # Celery PDF & Word tasks
+    └── templates/       # Alpine.js + Tailwind views</pre>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================= -->
+        <!-- TAB 4: USER PORTAL DEMO (SIMPLE 4-STEP WIZARD)            -->
+        <!-- ========================================================= -->
+        <div x-show="tab === 'user'" x-cloak class="space-y-8">
+            
+            <!-- Top Wizard Progress Bar -->
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center gap-2 sm:gap-4 flex-wrap">
+                    <button @click="userStep = 1" :class="userStep === 1 ? 'bg-sky-500 text-white' : 'bg-slate-950 text-slate-400'" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition">1. Upload PDF</button>
+                    <i class="ph-bold ph-caret-right text-slate-600"></i>
+                    <button @click="userStep = 2" :class="userStep === 2 ? 'bg-sky-500 text-white' : 'bg-slate-950 text-slate-400'" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition">2. Pay ($250)</button>
+                    <i class="ph-bold ph-caret-right text-slate-600"></i>
+                    <button @click="userStep = 3" :class="userStep === 3 ? 'bg-sky-500 text-white' : 'bg-slate-950 text-slate-400'" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition">3. AI Check</button>
+                    <i class="ph-bold ph-caret-right text-slate-600"></i>
+                    <button @click="userStep = 4" :class="userStep === 4 ? 'bg-emerald-500 text-white' : 'bg-slate-950 text-slate-400'" class="px-3.5 py-1.5 rounded-xl text-xs font-bold transition">4. Results & Export</button>
+                </div>
+                <div class="text-xs text-slate-400 font-mono">
+                    Company: <span class="text-white font-semibold">Apex Infra (ISO 27001 • Secret Clearance)</span>
+                </div>
+            </div>
+
+            <!-- STEP 1: UPLOAD & SECURITY LEVEL -->
+            <div x-show="userStep === 1" class="bg-slate-900 border border-slate-800 rounded-3xl p-8 max-w-2xl mx-auto space-y-6">
+                <h3 class="text-xl font-bold text-white">Step 1: Upload Tender PDF</h3>
+                
+                <div class="space-y-2">
+                    <label class="text-xs text-slate-400">Choose Sample RFP File:</label>
+                    <select x-model="selectedPdf" class="w-full bg-slate-950 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white">
+                        <option>State_Health_Cloud_RFP.pdf (24 MB)</option>
+                        <option>Defense_Zero_Trust_Cyber.pdf (68 MB)</option>
+                    </select>
+                </div>
+
+                <div class="space-y-2">
+                    <label class="text-xs text-slate-400">Select Security Routing (v2.1 Fix):</label>
+                    <div class="grid grid-cols-2 gap-3">
+                        <button @click="securityRoute = 'secret'" :class="securityRoute === 'secret' ? 'border-amber-400 bg-amber-500/10 text-white' : 'border-slate-800 bg-slate-950 text-slate-400'" class="p-4 rounded-2xl border text-left">
+                            <div class="font-bold text-xs text-amber-300">Secret / Government</div>
+                            <div class="text-[11px] mt-1">Direct to Private OpenAI (Bypasses OpenRouter)</div>
+                        </button>
+                        <button @click="securityRoute = 'standard'" :class="securityRoute === 'standard' ? 'border-sky-400 bg-sky-500/10 text-white' : 'border-slate-800 bg-slate-950 text-slate-400'" class="p-4 rounded-2xl border text-left">
+                            <div class="font-bold text-xs text-sky-300">Standard Commercial</div>
+                            <div class="text-[11px] mt-1">OpenRouter with Prompt Caching</div>
+                        </button>
+                    </div>
+                </div>
+
+                <button @click="userStep = 2; notify('Uploaded directly to Cloudflare R2!')" class="w-full py-3.5 rounded-2xl bg-sky-500 hover:bg-sky-400 text-white font-bold text-sm transition">
+                    Upload Directly to Cloud (R2) &rarr;
+                </button>
+            </div>
+
+            <!-- STEP 2: PAYMENT -->
+            <div x-show="userStep === 2" class="bg-slate-900 border border-slate-800 rounded-3xl p-8 max-w-xl mx-auto space-y-6 text-center">
+                <div class="w-14 h-14 rounded-2xl bg-emerald-500/15 text-emerald-400 flex items-center justify-center mx-auto text-2xl">
+                    <i class="ph-bold ph-credit-card"></i>
+                </div>
+                <div class="space-y-1">
+                    <h3 class="text-xl font-bold text-white">Step 2: Paystation Checkout</h3>
+                    <p class="text-xs text-slate-400">Protected by Redis Double-Charge Lock (`lock:payment:998214`)</p>
+                </div>
+                <div class="text-3xl font-extrabold font-mono text-white">$250.00 <span class="text-sm text-slate-400">USD</span></div>
+                <button @click="runAiSimulation()" class="w-full py-3.5 rounded-2xl bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-sm transition">
+                    Pay $250 & Start AI Analysis &rarr;
+                </button>
+            </div>
+
+            <!-- STEP 3: AI PROCESSING -->
+            <div x-show="userStep === 3" class="bg-slate-900 border border-slate-800 rounded-3xl p-8 max-w-xl mx-auto space-y-6 text-center">
+                <i class="ph-bold ph-spinner animate-spin text-4xl text-sky-400"></i>
+                <h3 class="text-xl font-bold text-white">Step 3: Reading & Scoring PDF...</h3>
+                <div class="w-full bg-slate-950 h-3 rounded-full overflow-hidden border border-slate-800">
+                    <div class="bg-sky-500 h-full transition-all duration-300" :style="'width:' + aiProgress + '%'"></div>
+                </div>
+                <p class="text-xs font-mono text-emerald-300" x-text="aiStatusText"></p>
+            </div>
+
+            <!-- STEP 4: RESULTS & EXPORT -->
+            <div x-show="userStep === 4" class="space-y-6">
+                
+                <!-- Top Summary Bar -->
+                <div class="bg-slate-900 border border-slate-800 rounded-3xl p-7 flex flex-col md:flex-row items-center justify-between gap-6">
+                    <div class="flex items-center gap-5">
+                        <div class="w-20 h-20 rounded-3xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center font-mono text-2xl font-black text-emerald-400" x-text="readinessScore + '%'"></div>
+                        <div>
+                            <span class="text-xs font-mono uppercase text-emerald-400">Readiness Score</span>
+                            <h3 class="text-xl font-bold text-white" x-text="selectedPdf"></h3>
+                            <p class="text-xs text-slate-400 mt-1">Change any status below to watch your score update live.</p>
+                        </div>
+                    </div>
+                    <button @click="notify('Downloading Evaluation_Matrix.docx from Cloudflare R2!')" class="px-6 py-3.5 rounded-2xl bg-sky-500 hover:bg-sky-400 text-white font-bold text-xs flex items-center gap-2 shadow-lg shadow-sky-500/20">
+                        <i class="ph-bold ph-download-simple text-base"></i> Download Word Report (.docx)
+                    </button>
+                </div>
+
+                <!-- Simple 4-Row Checklist -->
+                <div class="bg-slate-900 border border-slate-800 rounded-3xl p-7 space-y-4">
+                    <h4 class="text-sm font-bold text-white">Compliance Checklist (Click Status to Edit)</h4>
+                    <div class="divide-y divide-slate-800 text-xs">
+                        <template x-for="row in checklist" :key="row.id">
+                            <div class="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                                <div class="space-y-1 max-w-xl">
+                                    <div class="font-mono text-sky-400 font-bold" x-text="row.section"></div>
+                                    <div class="text-sm text-white font-medium" x-text="row.req"></div>
+                                    <div class="text-slate-400" x-text="row.note"></div>
+                                </div>
+                                <select x-model="row.status" @change="notify('Saved update to MongoDB!')"
+                                        class="bg-slate-950 border border-slate-700 rounded-xl px-3 py-2 font-mono font-bold text-xs"
+                                        :class="{
+                                            'text-emerald-400': row.status === 'COMPLIANT',
+                                            'text-amber-400': row.status === 'GAP',
+                                            'text-rose-400': row.status === 'NON_COMPLIANT'
+                                        }">
+                                    <option value="COMPLIANT">COMPLIANT (100%)</option>
+                                    <option value="GAP">PARTIAL GAP (50%)</option>
+                                    <option value="NON_COMPLIANT">NON-COMPLIANT (0%)</option>
+                                </select>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================================= -->
+        <!-- TAB 5: ADMIN DEMO (SIMPLE QUEUE & RECOVERY)               -->
+        <!-- ========================================================= -->
+        <div x-show="tab === 'admin'" x-cloak class="space-y-8">
+            
+            <!-- 3 Clean Top Stat Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6">
+                    <div class="text-xs font-mono text-slate-400">ACTIVE QUEUE JOBS</div>
+                    <div class="text-3xl font-extrabold text-white font-mono mt-2" x-text="adminJobs.length + ' Jobs'"></div>
+                    <div class="text-xs text-emerald-400 mt-1">1 job per worker (No overload)</div>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6">
+                    <div class="text-xs font-mono text-slate-400">ACTIVE REDIS LOCKS</div>
+                    <div class="text-3xl font-extrabold text-amber-400 font-mono mt-2">2 Locks</div>
+                    <div class="text-xs text-slate-400 mt-1">Prevents double-charging</div>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6">
+                    <div class="text-xs font-mono text-slate-400">PROMPT CACHE SAVINGS</div>
+                    <div class="text-3xl font-extrabold text-emerald-400 font-mono mt-2">68% Saved</div>
+                    <div class="text-xs text-slate-400 mt-1">2 PDF prompt hacks blocked</div>
+                </div>
+            </div>
+
+            <!-- Simple Job Table -->
+            <div class="bg-slate-900 border border-slate-800 rounded-3xl p-7 space-y-4">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-bold text-white">Tenant Job Queue</h3>
+                    <span class="text-xs text-slate-400">Manage failed scans & payments</span>
+                </div>
+
+                <div class="divide-y divide-slate-800 text-xs">
+                    <template x-for="job in adminJobs" :key="job.id">
+                        <div class="py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div>
+                                <div class="font-bold text-sm text-white" x-text="job.project"></div>
+                                <div class="text-slate-400 font-mono mt-0.5" x-text="job.tenant + ' • Route: ' + job.route"></div>
+                            </div>
+
+                            <div class="flex items-center gap-3">
+                                <span class="px-3 py-1 rounded-full font-mono font-bold text-[11px]"
+                                      :class="{
+                                        'bg-emerald-500/20 text-emerald-300': job.state === 'EVALUATED',
+                                        'bg-sky-500/20 text-sky-300': job.state === 'QUEUED',
+                                        'bg-amber-500/20 text-amber-300': job.state === 'UNREADABLE_SCAN' || job.state === 'PENDING_PAYMENT',
+                                        'bg-rose-500/20 text-rose-300': job.state === 'FAILED'
+                                      }" x-text="job.state"></span>
+
+                                <button x-show="job.state === 'FAILED' || job.state === 'UNREADABLE_SCAN'"
+                                        @click="job.state = 'QUEUED'; notify('Job sent back to queue!')"
+                                        class="px-3 py-1.5 rounded-xl bg-emerald-500 text-white font-bold">
+                                    Retry Job
+                                </button>
+
+                                <button x-show="job.state === 'PENDING_PAYMENT'"
+                                        @click="job.state = 'QUEUED'; notify('Payment manually approved!')"
+                                        class="px-3 py-1.5 rounded-xl bg-amber-500 text-slate-950 font-bold">
+                                    Approve Payment
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Simple Footer Disclaimer -->
+    <footer class="border-t border-slate-900 py-6 text-center text-xs text-slate-500 px-6">
+        TenderOS v2.1 Decision-Support Tool • Always review AI compliance results before final bid submission.
+    </footer>
+
+    <script>
+        function tenderApp() {
+            return {
+                tab: 'overview',
+                mode: 'fixed',
+                mapType: 'concept',
+                mapStep: 0,
+                specPeek: 'db',
+                userStep: 4, // Starts on Results so user sees value immediately; can click Step 1 anytime
+                selectedPdf: 'State_Health_Cloud_RFP.pdf (24 MB)',
+                securityRoute: 'secret',
+                aiProgress: 0,
+                aiStatusText: '',
+                toast: { show: false, msg: '' },
+
+                notify(msg) {
+                    this.toast = { show: true, msg };
+                    setTimeout(() => { this.toast.show = false; }, 3000);
+                },
+
+                // Maps Data (Short & Simple)
+                maps: {
+                    concept: [
+                        { title: 'Upload PDF', box1: 'User drops a 100MB Tender PDF into the page.', box2: 'Browser uploads it directly to Cloudflare R2 storage.', box3: 'Web server stays fast and never crashes.' },
+                        { title: 'Pay Fee', box1: 'User pays the $250 fee via Paystation.', box2: 'Redis locks the transaction ID for 5 minutes.', box3: 'Zero chance of charging the user twice.' },
+                        { title: 'Read Text', box1: 'User watches a simple progress bar.', box2: 'Worker streams PDF pages and splits text into 4k chunks.', box3: 'Saves 68% on AI token costs.' },
+                        { title: 'AI Check', box1: 'Automated background step.', box2: 'Wraps text in XML tags and checks company profile.', box3: 'Blocks hidden PDF hacks & returns clean JSON.' },
+                        { title: 'Edit & Export', box1: 'User tweaks checklist and clicks Download.', box2: 'Worker builds a formatted Word (.docx) report.', box3: 'Ready-to-submit bid package in seconds.' },
+                        { title: 'Admin View', box1: 'Admin checks queue health.', box2: 'Shows live Redis locks and failed scans.', box3: '1-click retry for any stuck job.' }
+                    ],
+                    process: [
+                        { title: '1. Get Link', box1: 'Select PDF file.', box2: 'Create 15-minute signed upload link.', box3: 'Draft record saved.' },
+                        { title: '2. Checkout', box1: 'Submit card details.', box2: 'Verify Paystation webhook signature.', box3: 'Payment marked SUCCESS.' },
+                        { title: '3. Queue Job', box1: 'Wait on status page.', box2: 'Push task to Redis eval_queue.', box3: 'Worker claims the job.' },
+                        { title: '4. AI Parse', box1: 'No action needed.', box2: 'Send 4k chunks to OpenAI/OpenRouter.', box3: 'Structured requirement list.' },
+                        { title: '5. Score Fit', box1: 'Review checklist.', box2: 'Match requirements against user certs.', box3: '0–100% Readiness Score.' },
+                        { title: '6. Word File', box1: 'Click Export button.', box2: 'Compile .docx file and save to R2.', box3: 'Direct download link.' }
+                    ],
+                    ops: [
+                        { title: 'Signed URL', box1: 'Browser sends file size.', box2: 'FastAPI checks PDF type & size <= 100MB.', box3: 'Returns R2 upload URL.' },
+                        { title: 'Direct PUT', box1: 'Browser streams binary.', box2: 'Cloudflare R2 stores the PDF.', box3: 'Returns HTTP 200 OK.' },
+                        { title: 'Webhook IPN', box1: 'Paystation sends receipt.', box2: 'FastAPI checks HMAC + Redis lock.', box3: 'Unlocks evaluation queue.' },
+                        { title: 'Stream PDF', box1: 'Celery Worker starts.', box2: 'PyMuPDF reads pages without saving to disk.', box3: 'Checks if OCR is needed.' },
+                        { title: 'Pydantic AI', box1: 'Worker sends XML chunks.', box2: 'Routes Secret docs to private Azure/OpenAI.', box3: 'Strict JSON output.' },
+                        { title: 'Build DOCX', box1: 'Worker runs python-docx.', box2: 'Uploads finished Word file to R2.', box3: 'Status set to EVALUATED.' }
+                    ]
+                },
+
+                get currentMapList() {
+                    return this.maps[this.mapType];
+                },
+
+                // 8 States (Simple 1-sentence rules)
+                states: [
+                    { step: 1, name: 'DRAFT', desc: 'Upload link created; waiting for browser to finish uploading PDF to Cloudflare R2.', next: 'PENDING_PAYMENT, FAILED' },
+                    { step: 2, name: 'PENDING_PAYMENT', desc: 'PDF is in cloud storage; waiting for Paystation $250 payment confirmation.', next: 'QUEUED, FAILED' },
+                    { step: 3, name: 'QUEUED', desc: 'Payment confirmed; job is waiting in Redis for the next free worker.', next: 'PROCESSING, FAILED' },
+                    { step: 4, name: 'PROCESSING', desc: 'Worker locked the job, streaming PDF pages and running AI checks.', next: 'EVALUATED, UNREADABLE_SCAN, FAILED' },
+                    { step: 5, name: 'UNREADABLE_SCAN', desc: 'First 3 pages are scanned images with no text; sending to OCR.', next: 'REPROCESSING, FAILED' },
+                    { step: 6, name: 'REPROCESSING', desc: 'OCR engine is extracting text from scanned images.', next: 'PROCESSING, FAILED' },
+                    { step: 7, name: 'EVALUATED', desc: 'All done! Score calculated and Word report is ready to download.', next: 'None (Finished)' },
+                    { step: 8, name: 'FAILED', desc: 'Something went wrong; Admin can click Retry to put it back in QUEUED.', next: 'QUEUED (Admin Retry)' }
+                ],
+                activeState: null,
+
+                // User Demo Checklist
+                checklist: [
+                    { id: 1, section: 'Section 4.2', req: 'Active ISO 27001 Cloud Security Certification.', note: 'Matched: Apex Infra holds ISO 27001.', status: 'COMPLIANT' },
+                    { id: 2, section: 'Section 4.4', req: 'Active Secret Facility Clearance required.', note: 'Matched: Secret Clearance verified.', status: 'COMPLIANT' },
+                    { id: 3, section: 'Section 6.1', req: 'Minimum 100 dedicated full-time staff.', note: 'Gap: Company has 85 staff (need partner for 15).', status: 'GAP' },
+                    { id: 4, section: 'Section 7.3', req: 'SOC2 Type II continuous monitoring.', note: 'Matched: SOC2 Type II active.', status: 'COMPLIANT' }
+                ],
+
+                get readinessScore() {
+                    let total = 0;
+                    this.checklist.forEach(r => {
+                        if (r.status === 'COMPLIANT') total += 100;
+                        else if (r.status === 'GAP') total += 50;
+                    });
+                    return Math.round(total / this.checklist.length);
+                },
+
+                runAiSimulation() {
+                    this.userStep = 3;
+                    this.aiProgress = 25;
+                    this.aiStatusText = '1/3: Streaming PDF from Cloudflare R2...';
+                    setTimeout(() => {
+                        this.aiProgress = 65;
+                        this.aiStatusText = '2/3: Splitting into 4,000-token chunks + XML safety tags...';
+                    }, 700);
+                    setTimeout(() => {
+                        this.aiProgress = 100;
+                        this.aiStatusText = '3/3: Matching against company profile...';
+                    }, 1400);
+                    setTimeout(() => {
+                        this.userStep = 4;
+                        this.notify('Analysis Complete!');
+                    }, 2000);
+                },
+
+                // Admin Demo Jobs
+                adminJobs: [
+                    { id: 1, project: 'State_Health_Cloud_RFP.pdf', tenant: 'Apex Infra', route: 'Direct OpenAI (Secret)', state: 'EVALUATED' },
+                    { id: 2, project: 'City_Transit_Ticketing.pdf', tenant: 'MetroSoft', route: 'OpenRouter (Cached)', state: 'UNREADABLE_SCAN' },
+                    { id: 3, project: 'Power_Grid_Telemetry.pdf', tenant: 'VoltGrid', route: 'OpenRouter (Cached)', state: 'FAILED' },
+                    { id: 4, project: 'School_Portal_Upgrade.pdf', tenant: 'BrightPath', route: 'OpenRouter (Cached)', state: 'PENDING_PAYMENT' }
+                ],
+
+                init() {
+                    this.activeState = this.states[3]; // Default to PROCESSING
+                }
+            }
+        }
+    </script>
+</body>
+</html>
